@@ -147,6 +147,7 @@
                                                     <div class="col-md-4">
                                                         <label for="mobile">Mobile</label>
                                                         <input type="text" data-inputmask="'mask': '9999-9999999'" pattern="\d{4}-\d{7}" placeholder="XXXX-XXXXXXX" class="form-control config" id="mobile" name="mobile">
+                                                        <span id="mobile_error" style="color:red;"></span>
                                                     </div>
                                                     <div class="col-md-4 other_details_form" style="display: none;">
                                                         <label for="country">Country</label>
@@ -293,8 +294,7 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <!-- Inputmask CDN -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.8/jquery.inputmask.min.js"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.8/jquery.inputmask.min.js"></script> 
 <script>
     $(document).on('click', '#list_details', function() {
         const type = $('input[name="patient_type"]:checked').val();
@@ -312,6 +312,15 @@
             $('.other_details_form').show()
         }
     })
+    $(document).on('keyup', '#mobile', function(){
+        var mobile = $('#mobile').val();
+
+        var pattern = '/^(?!0000-0000000$)(?!1111-1111111$)(?!2222-2222222$)(?!3333-3333333$)(?!4444-4444444$)(?!5555-5555555$)(?!6666-6666666$)(?!7777-7777777$)(?!8888-8888888$)(?!9999-999999$)\d{11,12}$/';
+       if(!mobile.match(pattern)){
+            $('#mobile').val('');
+            $('#mobile_error').text('Mobile no is invalid.')
+        }
+    });
 
 
     $(document).on('click', '#search_patient', function() {
