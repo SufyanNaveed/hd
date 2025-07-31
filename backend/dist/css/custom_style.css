@@ -1,0 +1,40 @@
+.box_dashboard{
+	display: block;
+    font-size: 15px;
+    margin-top: 38px;
+    white-space: nowrap;
+    margin-left: 19px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+    /* Alternating row colors for all tables with .custom-table class */
+    .custom-table tbody tr:nth-child(odd) {
+        background-color: #d1ecf1 !important; /* Light blue for odd rows */
+    }
+    
+    .custom-table tbody tr:nth-child(even) {
+        background-color: #f5c6cb !important; /* Light red for even rows */
+    }
+    
+    /* Hover effect for rows */
+    .custom-table tbody tr:hover {
+        background-color: #ffeeba !important; /* Light yellow on hover */
+    }
+    
+    /* Contextual table colors (only for the table background, not affecting rows) */
+    .custom-table.success {
+        background-color: #d4edda !important; /* Green table background */
+    }
+    
+    .custom-table.info {
+        background-color: #bee5eb !important; /* Blue table background */
+    }
+    
+    .custom-table.warning {
+        background-color: #ffeeba !important; /* Yellow table background */
+    }
+    
+    .custom-table.danger {
+        background-color: #f8d7da !important; /* Red table background */
+    }
