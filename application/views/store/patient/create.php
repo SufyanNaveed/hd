@@ -146,7 +146,7 @@
                                                     </div>
                                                     <div class="col-md-4">
                                                         <label for="mobile">Mobile</label>
-                                                        <input type="text" data-inputmask="'mask': '9999-9999999'" pattern="\d{4}-\d{7}" placeholder="XXXX-XXXXXXX" class="form-control config" id="mobile" name="mobile">
+                                                        <input type="text" data-inputmask="'mask': '9999-9999999'" pattern="\d{4}-\d{7}" placeholder="XXXX-XXXXXXX" class="form-control config" id="mobile" name="mobile" value="">
                                                         <span id="mobile_error" style="color:red;"></span>
                                                     </div>
                                                     <div class="col-md-4 other_details_form" style="display: none;">
@@ -314,11 +314,16 @@
     })
     $(document).on('keyup', '#mobile', function(){
         var mobile = $('#mobile').val();
-
-        var pattern = '/^(?!0000-0000000$)(?!1111-1111111$)(?!2222-2222222$)(?!3333-3333333$)(?!4444-4444444$)(?!5555-5555555$)(?!6666-6666666$)(?!7777-7777777$)(?!8888-8888888$)(?!9999-999999$)\d{11,12}$/';
-       if(!mobile.match(pattern)){
-            $('#mobile').val('');
-            $('#mobile_error').text('Mobile no is invalid.')
+        mobile = mobile.replace('_','0');
+        if(mobile.length > 10){
+            if(mobile == '0000-0000000' || mobile == '1111-1111111' || mobile == '2222-2222222' || mobile == '3333-3333333' ||
+                mobile == '4444-4444444' || mobile == '5555-5555555' || mobile == '6666-6666666' || mobile == '7777-7777777' ||
+                mobile == '8888-8888888' || mobile == '9999-999999'){
+                $('#mobile').val('');
+                $('#mobile_error').text('Mobile no is invalid.')
+            }else{
+                $('#mobile_error').text('')
+            }
         }
     });
 
