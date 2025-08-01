@@ -42,20 +42,20 @@ class Pharmacy extends Hospital_Controller
         // if (!$this->rbac->hasPrivilege('medicine', 'can_view')) {
         //     access_denied();
         // }
-        $medicineCategory         = $this->medicine_category_model->getMedicineCategory();
-        $data["medicineCategory"] = $medicineCategory;
-        $resultlist               = $this->pharmacy_model->searchFullText();
-        $i                        = 0;
-        foreach ($resultlist as $value) {
-            $pharmacy_id                 = $value['id'];
-            $available_qty               = $this->pharmacy_model->totalQuantity($pharmacy_id);
-            $totalAvailableQty           = $available_qty['total_qty'];
-            $resultlist[$i]["total_qty"] = $totalAvailableQty;
-            $i++;
-        }
-        $result             = $this->pharmacy_model->getPharmacy();
-        $data['resultlist'] = $resultlist;
-        $data['result']     = $result;
+        // $medicineCategory         = $this->medicine_category_model->getMedicineCategory();
+        // $data["medicineCategory"] = $medicineCategory;
+        // $resultlist               = $this->pharmacy_model->searchFullText();
+        // $i                        = 0;
+        // foreach ($resultlist as $value) {
+        //     $pharmacy_id                 = $value['id'];
+        //     $available_qty               = $this->pharmacy_model->totalQuantity($pharmacy_id);
+        //     $totalAvailableQty           = $available_qty['total_qty'];
+        //     $resultlist[$i]["total_qty"] = $totalAvailableQty;
+        //     $i++;
+        // }
+        // $result             = $this->pharmacy_model->getPharmacy();
+        // $data['resultlist'] = $resultlist;
+        // $data['result']     = $result;
         $data['stock']     = $stock;
         //   echo "<pre>";  print_r($data);exit;
         $this->load->view('layout/user/header');

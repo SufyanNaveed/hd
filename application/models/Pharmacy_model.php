@@ -124,9 +124,9 @@ class Pharmacy_model extends CI_Model
         }
 
         // Apply limits for pagination
-        if($search_type != 'all' && $search_type != ""){
+        // if($search_type != 'all' && $search_type != ""){
             $this->db->limit($_POST['length'], $_POST['start']);
-        }
+        // }
 
         // Apply ordering
         $this->db->order_by($this->column_order[$_POST['order'][0]['column']], $_POST['order'][0]['dir']);
