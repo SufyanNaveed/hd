@@ -127,7 +127,7 @@ $bloodgroup = $this->config->item('bloodgroup');
                                                                     </div>
                                                                 </div>
 
-                                                                <div class="col-lg-3 col-md-3 col-sm-3"
+                                                                <!-- <div class="col-lg-3 col-md-3 col-sm-3"
                                                                     style="<?php echo (!empty($user) && !empty($user->store_id)) ? '' : 'display: none;'; ?>"
                                                                     id="store_section">
                                                                     <div class="form-group">
@@ -144,9 +144,22 @@ $bloodgroup = $this->config->item('bloodgroup');
                                                                             <?php } ?>
                                                                         </select>
                                                                     </div>
+                                                                </div> -->
+ 
+                                                                <div class="col-lg-3 col-md-3 col-sm-3">
+                                                                    <div class="form-group">
+                                                                        <label>Password</label>
+                                                                        <input type="password" id="password" name="password" class="form-control" />
+                                                                    </div>
                                                                 </div>
 
-
+                                                                <div class="col-lg-3 col-md-3 col-sm-3">
+                                                                    <div class="form-group">
+                                                                        <label>Confirm Password</label>
+                                                                        <input type="password" id="con_password" name="con_password" class="form-control"/>
+                                                                        <span id="con_password_error"></span>
+                                                                    </div>
+                                                                </div>
                                                             </div><!--./row-->
                                                         </div><!--./col-md-8-->
                                                     </div><!--./row-->
@@ -287,6 +300,14 @@ $bloodgroup = $this->config->item('bloodgroup');
 
         $(document).ready(function(e) {
         $("#formeditUser").on('submit', (function(e) {
+
+            if($('#password').val() != $('#con_password').val()){
+                $('#con_password_error').text('Passwords do not match');
+                $('#con_password_error').css('color','red');
+                return false;
+            }else{
+                $('#con_password_error').text('');
+            }
             $("#formeditpabtn").button('loading');
             e.preventDefault();
             $.ajax({
@@ -316,4 +337,8 @@ $bloodgroup = $this->config->item('bloodgroup');
             });
         }));
     });
+
+    $('#password').on('keyup', function(){
+        $('#con_password').attr('required','required');
+    })
 </script>

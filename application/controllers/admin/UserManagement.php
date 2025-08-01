@@ -11,6 +11,7 @@ class UserManagement extends Admin_Controller
         // Load the Store Model
         $this->load->model('store_model');
         $this->load->model('hospital_model');
+        $this->load->library('Enc_lib');
     }
 
     // Store List Page
@@ -194,7 +195,7 @@ class UserManagement extends Admin_Controller
             $action .= "<div class='btn-group' style='margin-left:2px;'>";
             $action .= "<a href='#' style='width: 20px;border-radius: 2px;' class='btn btn-default btn-xs' data-toggle='dropdown' title='Options'><i class='fa fa-ellipsis-v'></i></a>";
             $action .= "<ul class='dropdown-menu dropdown-menu2' role='menu'>";
-            // $action .= "<li><a href='" . base_url("admin/userManagement/getUserDetail?id=" . urlencode($result_value->id)) . "'>Edit</a></li>";
+            $action .= "<li><a href='" . base_url("admin/userManagement/getUserDetail?id=" . urlencode($result_value->id)) . "'>Edit</a></li>";
             $action .= "<li><a href='#' onclick='deleteRecord(" . $result_value->id . ")'>Delete</a></li>";
             $action .= "</ul>";
             $action .= "<a href='" .base_url("/site/userByPasslogin/" . urlencode($result_value->id)) . "'><i class='fa fa-sign-in'></i></a>";
@@ -299,9 +300,9 @@ class UserManagement extends Admin_Controller
         }
     
         if ($role_name === "Department Pharmacist") {
-            $this->form_validation->set_rules('store_id', 'Store', 'trim|required', [
-                'required' => 'The %s field is required for Department Pharmacist role.'
-            ]);
+            // $this->form_validation->set_rules('store_id', 'Store', 'trim|required', [
+            //     'required' => 'The %s field is required for Department Pharmacist role.'
+            // ]);
             if($departments == ""){ 
                 $this->form_validation->set_rules('department_id', 'Department', 'trim|required', [
                     'required' => 'The %s field is required for Department Pharmacist role.'
@@ -319,7 +320,7 @@ class UserManagement extends Admin_Controller
                 'mobileno' => form_error('mobileno'),
                 'shift_start_time' => form_error('shift_start_time'),
                 'shift_end_time' => form_error('shift_end_time'),
-                'store_id' => form_error('store_id'),
+                // 'store_id' => form_error('store_id'),
                 'department_id' => form_error('department_id')
             );
             $array = array('status' => 'fail', 'error' => $msg);
@@ -335,7 +336,8 @@ class UserManagement extends Admin_Controller
                 'shift_end_time' => $this->input->post('shift_end_time'),
                 'hospital_id' => $this->input->post('hospital_id'),
                 'department_id' => $this->input->post('department_id')[0],
-                'store_id' => $this->input->post('store_id'),
+                'password' => $this->enc_lib->passHashEnc($this->input->post('password')),
+                // 'store_id' => $this->input->post('store_id'),
             );
     
             if ($this->user_model->update_user($update_id, $user_data)) {
