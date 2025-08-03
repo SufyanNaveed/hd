@@ -547,11 +547,45 @@ $genderList = $this->customlib->getGender();
             return true;
         }
 
-        function delete_row(id) {
-            var table = document.getElementById("tableID");
-            var rowCount = table.rows.length;
-            $("#row" + id).remove();
+            function delete_row(id) {
+    var rowElement = $("#row" + id);
+    var billDetailId = rowElement.find("input[name='bill_detail_id[]']").val(); // Get bill_detail_id
+console.log('billDetailId',billDetailId)
+    if (billDetailId != 0) {
+        // Confirm before deletion
+        if (!confirm("Are you sure you want to delete this item?")) {
+            return;
         }
+
+        $.ajax({
+            url: '<?php echo base_url(); ?>hospital/pharmacy/deleteSupplierBillDetail',
+            type: "POST",
+            data: { bill_detail_id: billDetailId },
+            dataType: "json",
+            success: function (response) {
+                if (response.status === "success") {
+                    successMsg("Row deleted successfully.");
+                    rowElement.remove(); // Remove row from frontend after successful deletion
+                } else {
+                    errorMsg(response.message || "Error deleting the row.");
+                }
+            },
+            error: function () {
+                errorMsg("Failed to delete. Please try again.");
+            }
+        });
+    } else {
+        // If no bill_detail_id, just remove from UI
+        rowElement.remove();
+    }
+}
+
+
+        // function delete_row(id) {
+        //     var table = document.getElementById("tableID");
+        //     var rowCount = table.rows.length;
+        //     $("#row" + id).remove();
+        // }
 
         function addMore() {
             var table = document.getElementById("tableID");

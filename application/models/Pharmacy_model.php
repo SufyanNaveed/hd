@@ -32,15 +32,15 @@ class Pharmacy_model extends CI_Model
         return $this->db->insert_id();
     }
 
-    public function search_datatable($where_condition, $stock = null, $search_type='all')
+    public function search_datatable($where_condition, $stock = null, $search_type = 'all')
     {
         $select = "";
         if (isset($where_condition['hospital_id'])) {
-            $select .= " AND hospital_id = ".$where_condition['hospital_id']; 
+            $select .= " AND hospital_id = " . $where_condition['hospital_id'];
         }
         if (isset($where_condition['store_id'])) {
-            $select .= " AND store_id = ".$where_condition['store_id'];
-        } 
+            $select .= " AND store_id = " . $where_condition['store_id'];
+        }
 
         $this->db->select('
         pharmacy.*, 
@@ -52,7 +52,7 @@ class Pharmacy_model extends CI_Model
         (SELECT SUM(available_quantity) 
          FROM medicine_batch_details 
          WHERE pharmacy_id = pharmacy.id 
-         AND bill_status = "final"'. $select. ') as total_qty,
+         AND bill_status = "final"' . $select . ') as total_qty,
         ROUND(SUM(medicine_batch_details.available_quantity * medicine_batch_details.sale_rate), 2) as total_sale,
         ROUND(SUM(medicine_batch_details.available_quantity * medicine_batch_details.purchase_price), 2) as total_purchase
         ');
@@ -64,7 +64,7 @@ class Pharmacy_model extends CI_Model
         $this->db->join('medicine_company', 'pharmacy.medicine_company_id = medicine_company.id', 'left'); // New join for medicine_company
         $this->db->where('`pharmacy`.`medicine_category_id` = `medicine_category`.`id`');
 
-        
+
         // Apply filters from $where_condition
         if (isset($where_condition['hospital_id'])) {
             $this->db->where('medicine_batch_details.hospital_id', $where_condition['hospital_id']);
@@ -83,7 +83,7 @@ class Pharmacy_model extends CI_Model
             // Monday to Sunday of this week
             $start_date = date('Y-m-d H:i:s', strtotime('last monday 00:00:00'));
             $end_date = date('Y-m-d H:i:s', strtotime('next sunday 23:59:59'));
-        }  elseif ($search_type === 'this_month') {
+        } elseif ($search_type === 'this_month') {
             // First to last day of this month
             $start_date = date('Y-m-01');
             $end_date = date('Y-m-t 23:59:59');
@@ -97,9 +97,9 @@ class Pharmacy_model extends CI_Model
             // exit;
             $start_date = date('Y-m-01', strtotime('first day of next month'));
             $end_date = date('Y-m-t 23:59:59', strtotime('last day of next month'));
-        } 
-       
-        if($search_type != 'all' && $search_type != ""){
+        }
+
+        if ($search_type != 'all' && $search_type != "") {
             $this->db->where('pharmacy.created_at >=', $start_date);
             $this->db->where('pharmacy.created_at <=', $end_date);
         }
@@ -117,15 +117,15 @@ class Pharmacy_model extends CI_Model
         // Add GROUP BY to avoid duplicates
         $this->db->group_by('pharmacy.id');
 
-        if($stock != null && $stock == 1){
+        if ($stock != null && $stock == 1) {
             $this->db->having('total_qty >', 0);
-        } else if($stock != null && $stock == 0){
+        } else if ($stock != null && $stock == 0) {
             $this->db->having('total_qty', 0);
         }
 
         // Apply limits for pagination
         // if($search_type != 'all' && $search_type != ""){
-            $this->db->limit($_POST['length'], $_POST['start']);
+        $this->db->limit($_POST['length'], $_POST['start']);
         // }
 
         // Apply ordering
@@ -138,6 +138,77 @@ class Pharmacy_model extends CI_Model
 
 
 
+
+    public function get_medicine_name_with_stock($where_condition, $stock = null)
+    {
+        $select = "";
+        if (isset($where_condition['hospital_id'])) {
+            $select .= " AND hospital_id = " . $where_condition['hospital_id'];
+        }
+        if (isset($where_condition['store_id'])) {
+            $select .= " AND store_id = " . $where_condition['store_id'];
+        }
+
+        $this->db->select('
+        pharmacy.*, 
+        medicine_category.id as medicine_category_id, 
+        medicine_category.medicine_category, 
+        medicine_company.id as medicine_company_id,
+        medicine_company.name as medicine_company_name,
+        (SELECT SUM(available_quantity) 
+         FROM medicine_batch_details 
+         WHERE pharmacy_id = pharmacy.id 
+         AND bill_status = "final"' . $select . ') as total_qty
+    ');
+
+        $this->db->from('pharmacy');
+
+        // Joins
+        $this->db->join('medicine_category', 'pharmacy.medicine_category_id = medicine_category.id', 'left');
+        $this->db->join('medicine_batch_details', 'pharmacy.id = medicine_batch_details.pharmacy_id', 'left');
+        $this->db->join('medicine_company', 'pharmacy.medicine_company_id = medicine_company.id', 'left');
+
+        // WHERE conditions
+        $this->db->where('pharmacy.medicine_category_id = medicine_category.id');
+
+        if (isset($where_condition['hospital_id'])) {
+            $this->db->where('medicine_batch_details.hospital_id', $where_condition['hospital_id']);
+            $this->db->where('medicine_batch_details.bill_status', 'final');
+        }
+        if (isset($where_condition['store_id'])) {
+            $this->db->where('medicine_batch_details.store_id', $where_condition['store_id']);
+        }
+        if (isset($where_condition['user_id'])) {
+            $this->db->where('pharmacy.user_id', $where_condition['user_id']);
+        }
+
+        // Search Filter
+        if (!empty($where_condition['search'])) {
+            $this->db->group_start();
+            foreach ($this->column_search as $column) {
+                $this->db->or_like($column, $where_condition['search']);
+            }
+            $this->db->group_end();
+        }
+
+        // Group to avoid duplicates
+        $this->db->group_by('pharmacy.id');
+
+        // Stock Filter (having clause)
+        if ($stock !== null && $stock == 1) {
+            $this->db->having('total_qty >', 0);
+        } else if ($stock !== null && $stock == 0) {
+            $this->db->having('total_qty', 0);
+        }
+
+        // REMOVE pagination limits and ordering here — NO LIMIT / NO ORDER BY
+
+        $query = $this->db->get();
+
+        // echo '<pre>'; print_r($this->db->last_query()); exit;
+
+        return $query->result();
+    }
 
 
 
@@ -168,20 +239,20 @@ class Pharmacy_model extends CI_Model
         return $query->result();
     }
 
-    public function search_datatable_count($where_condition, $stock = null, $search_type='all')
+    public function search_datatable_count($where_condition, $stock = null, $search_type = 'all')
     {
         $select = "";
         if (isset($where_condition['hospital_id'])) {
-            $select .= " AND hospital_id = ".$where_condition['hospital_id']; 
+            $select .= " AND hospital_id = " . $where_condition['hospital_id'];
         }
         if (isset($where_condition['store_id'])) {
-            $select .= " AND store_id = ".$where_condition['store_id'];
+            $select .= " AND store_id = " . $where_condition['store_id'];
         }
-        
+
         $this->db->select('pharmacy.id, (SELECT SUM(available_quantity) 
          FROM medicine_batch_details 
          WHERE pharmacy_id = pharmacy.id 
-         AND bill_status = "final"' .$select.') as total_qty
+         AND bill_status = "final"' . $select . ') as total_qty
          '); // Select only the pharmacy ID for counting
         $this->db->from('pharmacy');
 
@@ -207,7 +278,7 @@ class Pharmacy_model extends CI_Model
             // Monday to Sunday of this week
             $start_date = date('Y-m-d H:i:s', strtotime('last monday 00:00:00'));
             $end_date = date('Y-m-d H:i:s', strtotime('next sunday 23:59:59'));
-        }  elseif ($search_type === 'this_month') {
+        } elseif ($search_type === 'this_month') {
             // First to last day of this month
             $start_date = date('Y-m-01');
             $end_date = date('Y-m-t 23:59:59');
@@ -221,9 +292,9 @@ class Pharmacy_model extends CI_Model
             // exit;
             $start_date = date('Y-m-01', strtotime('first day of next month'));
             $end_date = date('Y-m-t 23:59:59', strtotime('last day of next month'));
-        } 
-       
-        if($search_type != 'all' && $search_type != ""){
+        }
+
+        if ($search_type != 'all' && $search_type != "") {
             $this->db->where('pharmacy.created_at >=', $start_date);
             $this->db->where('pharmacy.created_at <=', $end_date);
         }
@@ -240,9 +311,9 @@ class Pharmacy_model extends CI_Model
         // Add GROUP BY to avoid duplicate rows
         $this->db->group_by('pharmacy.id');
 
-        if($stock != null && $stock == 1){
+        if ($stock != null && $stock == 1) {
             $this->db->having('total_qty >', 0);
-        }else if($stock != null && $stock == 0){
+        } else if ($stock != null && $stock == 0) {
             $this->db->having('total_qty', 0);
         }
         // Count total results
@@ -538,7 +609,7 @@ class Pharmacy_model extends CI_Model
             $this->db->where('supplier_bill_basic.target_store_id', $store_id);
         }
 
-        $this->db->where_in('supplier_bill_basic.bill_status', ['final','partial']);
+        $this->db->where_in('supplier_bill_basic.bill_status', ['final', 'partial']);
 
         // return $this->db->count_all_results();
         $result = $this->db->get()->row();
@@ -548,10 +619,10 @@ class Pharmacy_model extends CI_Model
     public function get_supplier_stock_summary_Admin()
     {
         $total_result = 0;
-        for($i = 1; $i <= 8; $i++){
+        for ($i = 1; $i <= 8; $i++) {
             $hospital_id = $i;
 
-            $store = $this->db->query('SELECT id FROM main_stores WHERE entity_id = '.$hospital_id.' AND store_name LIKE "%Primary Pharmacy" LIMIT 1')->row();
+            $store = $this->db->query('SELECT id FROM main_stores WHERE entity_id = ' . $hospital_id . ' AND store_name LIKE "%Primary Pharmacy" LIMIT 1')->row();
             // echo '<pre>'; print_r($store); exit;
 
 
@@ -564,13 +635,13 @@ class Pharmacy_model extends CI_Model
             // Apply filters if hospital_id and store_id are provided
             if (!empty($hospital_id)) {
                 $this->db->where('supplier_bill_basic.hospital_id', $hospital_id);
-            } 
+            }
 
             if (!empty($store)) {
                 $this->db->where_in('supplier_bill_basic.store_id', $store->id);
-            }  
+            }
 
-            
+
             // $this->db->where('supplier_bill_basic.bill_status', 'final');
 
             // return $this->db->count_all_results();
@@ -583,7 +654,7 @@ class Pharmacy_model extends CI_Model
 
         return $total_result;
     }
-    
+
 
     public function getBillBasic($limit = "", $start = "")
     {
@@ -755,17 +826,17 @@ class Pharmacy_model extends CI_Model
         return $query->result_array();
     }
 
-    public function getQuantity($batch_no = null, $med_id, $hospital_id = null, $store_id = null,$batch_id = null)
+    public function getQuantity($batch_no = null, $med_id, $hospital_id = null, $store_id = null, $batch_id = null)
     {
         $this->db->select('medicine_batch_details.id, medicine_batch_details.available_quantity, medicine_batch_details.quantity, medicine_batch_details.purchase_price, medicine_batch_details.sale_rate')
-            
+
             ->where('pharmacy_id', $med_id);
 
-        if(!empty($batch_no)) {
+        if (!empty($batch_no)) {
             $this->db->where('batch_no', $batch_no);
         }
 
-        if(!empty($batch_id)) {
+        if (!empty($batch_id)) {
             $this->db->where('id', $batch_id);
         }
         // Apply hospital filter if provided
@@ -1293,7 +1364,7 @@ class Pharmacy_model extends CI_Model
         }
         $this->db->where('supplier_bill_basic.bill_status', 'final');
 
-        if($status){
+        if ($status) {
             $this->db->where('supplier_bill_basic.status', $status);
         }
 
@@ -1496,9 +1567,9 @@ class Pharmacy_model extends CI_Model
 
         return $query->result(); // Return multiple objects (array of results)
     }
- public function getBatchExpireDate($batch_id)
+    public function getBatchExpireDate($batch_id)
     {
-       $query = $this->db->where("id", $batch_id)
+        $query = $this->db->where("id", $batch_id)
             ->get('medicine_batch_details');
         return $query->row_array();
     }
@@ -1593,6 +1664,53 @@ class Pharmacy_model extends CI_Model
         return $this->db->get()->result_array();
     }
 
+
+    public function getAllAvailableMedicines($hospital_id = null, $store_id = null, $role = null)
+    {
+        $this->db->select('
+        pharmacy.*, 
+        medicine_category.id as medicine_category_id, 
+        medicine_category.medicine_category, 
+        SUM(medicine_batch_details.available_quantity) as total_qty, 
+        ROUND(SUM(medicine_batch_details.available_quantity * medicine_batch_details.sale_rate), 2) as total_sale,
+        ROUND(SUM(medicine_batch_details.available_quantity * medicine_batch_details.purchase_price), 2) as total_purchase
+    ');
+
+        $this->db->from('pharmacy');
+        $this->db->join('medicine_category', 'pharmacy.medicine_category_id = medicine_category.id', 'left');
+        $this->db->join('medicine_batch_details', 'pharmacy.id = medicine_batch_details.pharmacy_id', 'inner');
+        $this->db->join('supplier_bill_basic', 'medicine_batch_details.supplier_bill_basic_id = supplier_bill_basic.id', 'left');
+
+        // Only medicines with available stock
+        $this->db->where('medicine_batch_details.available_quantity >', 0);
+
+        // Hospital filter
+        if (!empty($hospital_id)) {
+            $this->db->where('medicine_batch_details.hospital_id', $hospital_id);
+        }
+
+        // Store logic based on role
+        if (!empty($store_id)) {
+            if ($role === 'Chief Pharmacist' || $role === 'Store In-Charge') {
+                $this->db->where('medicine_batch_details.store_id', $store_id);
+            } else {
+                $this->db->where('medicine_batch_details.target_store_id', $store_id);
+            }
+            $this->db->where('medicine_batch_details.bill_status', 'final');
+        }
+
+        $this->db->group_by('pharmacy.id');
+        $this->db->order_by('pharmacy.medicine_name', 'asc');
+
+        $query = $this->db->get();
+
+        if (!$query) {
+            log_message('error', 'Database error in getAllAvailableMedicines: ' . $this->db->last_query());
+            return [];
+        }
+
+        return $query->result_array();
+    }
 
 
     public function generateBillNumber()
@@ -1746,7 +1864,7 @@ class Pharmacy_model extends CI_Model
     }
 
 
-    public function get_hospital_issued_medicine_stats($hospital_id = null, $store_id = null, $role = null,$date=null)
+    public function get_hospital_issued_medicine_stats($hospital_id = null, $store_id = null, $role = null, $date = null)
     {
         $this->db->select("
         COUNT(DISTINCT pharmacy_bill_detail.medicine_name) AS total_issued_medicines,
@@ -1794,13 +1912,13 @@ class Pharmacy_model extends CI_Model
         // ✅ Apply Hospital ID filter from `pharmacy_bill_basic`
         if (!is_null($hospital_id)) {
             $this->db->where('supplier_bill_basic.hospital_id', $hospital_id);
-        } 
+        }
 
         if (!is_null($store_id)) {
             $this->db->where('supplier_bill_basic.transfer_store_id', $store_id);
-        } 
+        }
 
-        $this->db->where_in('supplier_bill_basic.bill_status', ['final','partial']);
+        $this->db->where_in('supplier_bill_basic.bill_status', ['final', 'partial']);
 
         $query = $this->db->get();
         // echo '<pre>'; print_r($this->db->last_query());exit;
@@ -2191,4 +2309,47 @@ class Pharmacy_model extends CI_Model
 
         return $query->num_rows() > 0;
     }
+
+    public function get_medicine_name_with_batch($where_condition, $role)
+{
+    $this->db->select('
+        pharmacy.id, 
+        pharmacy.medicine_name, 
+        medicine_category.medicine_category, 
+        SUM(medicine_batch_details.available_quantity) as total_qty
+    ');
+    $this->db->from('pharmacy');
+    $this->db->join('medicine_category', 'pharmacy.medicine_category_id = medicine_category.id', 'left');
+    $this->db->join('medicine_batch_details', 'pharmacy.id = medicine_batch_details.pharmacy_id', 'inner');
+
+    // Category filter
+    if (!empty($where_condition['category_id'])) {
+        $this->db->where('pharmacy.medicine_category_id', $where_condition['category_id']);
+    }
+
+    // Only medicines with available stock
+    $this->db->where('medicine_batch_details.available_quantity >', 0);
+
+    // Hospital filter
+    if (!empty($where_condition['hospital_id'])) {
+        $this->db->where('medicine_batch_details.hospital_id', $where_condition['hospital_id']);
+    }
+
+    // Store logic based on role
+    if (!empty($where_condition['store_id'])) {
+        if ($role === 'Chief Pharmacist' || $role === 'Store In-Charge') {
+            $this->db->where('medicine_batch_details.store_id', $where_condition['store_id']);
+        } else {
+            $this->db->where('medicine_batch_details.target_store_id', $where_condition['store_id']);
+        }
+        $this->db->where('medicine_batch_details.bill_status', 'final');
+    }
+
+    $this->db->group_by('pharmacy.id');
+
+    $query = $this->db->get();
+
+    return $query->result_array();
+}
+
 }
