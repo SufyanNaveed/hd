@@ -478,21 +478,30 @@ class Pharmacy extends Hospital_Controller
         $data = $this->patient_model->supplierDetails($id);
         echo json_encode($data);
     }
+    public function get_without_stock_medicine_name()
+    {
+        // if (!$this->rbac->hasPrivilege('medicine', 'can_view')) {
+        //     access_denied();
+        // }
+        $medicine_category_id = $this->input->post("medicine_category_id");
+        $data                 = $this->pharmacy_model->get_medicine_name($medicine_category_id);
+        echo json_encode($data);
+    }
     public function get_medicine_name()
-{
-    $medicine_category_id = $this->input->post("medicine_category_id");
-    $role = $this->session->userdata('hospital')['role'];
+    {
+        $medicine_category_id = $this->input->post("medicine_category_id");
+        $role = $this->session->userdata('hospital')['role'];
 
-    $where_condition = [
-        'hospital_id' => $this->hospital_id,
-        'store_id'    => $this->store_id,
-        'category_id' => $medicine_category_id,
-    ];
+        $where_condition = [
+            'hospital_id' => $this->hospital_id,
+            'store_id'    => $this->store_id,
+            'category_id' => $medicine_category_id,
+        ];
 
-    $result = $this->pharmacy_model->get_medicine_name_with_batch($where_condition, $role);
+        $result = $this->pharmacy_model->get_medicine_name_with_batch($where_condition, $role);
 
-    echo json_encode($result);
-}
+        echo json_encode($result);
+    }
 
     public function getBatchNoList()
     {

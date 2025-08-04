@@ -507,7 +507,7 @@ $genderList = $this->customlib->getGender();
         $("#medicine_name" + rowid).html("<option value='l'><?php echo $this->lang->line('loading') ?></option>");
         $('#medicine_name' + rowid).select2("val", 'l');
         $.ajax({
-            url: '<?php echo base_url(); ?>hospital/pharmacy/get_medicine_name',
+            url: '<?php echo base_url(); ?>hospital/pharmacy/get_without_stock_medicine_name',
             type: "POST",
             data: {
                 medicine_category_id: id
