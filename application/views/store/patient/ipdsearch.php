@@ -1352,146 +1352,92 @@ $genderList = $this->customlib->getGender();
 </script>
 
 <script type="text/javascript">
-    $(document).ready(function() {
-        // Initialize DataTable with filter support
-        var test_ajax = $('.test_ajax').DataTable({
-            "processing": true,
-            "serverSide": true,
-             "createdRow": function( row, data, dataIndex ) {
-                $(row).children(':nth-child(11)').addClass('text-right');
-                $(row).children(':nth-child(10)').addClass('text-right');
-                $(row).children(':nth-child(9)').addClass('text-right');
-                 $(row).children(':nth-child(8)').addClass('text-right');
-            },
-            "ajax": {
-                "url": base_url+"hospital/patient/ipd_search",
-                "type": "POST",
-                "data": function(d) {
-                    // Add filter parameters to AJAX request
-                    d.date_from = $('#date_from').val();
-                    d.date_to = $('#date_to').val();
-                    d.medication_filter = $('#medication_filter').val();
-                }
-            },
-         responsive: 'true',
-            dom: "Bfrtip",
-         buttons: [
-
-                {
-                    extend: 'copyHtml5',
-                    text: '<i class="fa fa-files-o"></i>',
-                    titleAttr: 'Copy',
-                    title: $('.download_label').html(),
-                    exportOptions: {
-                        columns: ':visible'
-                    }
-                },
-
-                {
-                    extend: 'excelHtml5',
-                    text: '<i class="fa fa-file-excel-o"></i>',
-                    titleAttr: 'Excel',
-
-                    title: $('.download_label').html(),
-                    exportOptions: {
-                        columns: ':visible'
-                    }
-                },
-
-                {
-                    extend: 'csvHtml5',
-                    text: '<i class="fa fa-file-text-o"></i>',
-                    titleAttr: 'CSV',
-                    title: $('.download_label').html(),
-                    exportOptions: {
-                        columns: ':visible'
-                    }
-                },
-
-                {
-                    extend: 'pdfHtml5',
-                    text: '<i class="fa fa-file-pdf-o"></i>',
-                    titleAttr: 'PDF',
-                    title: $('.download_label').html(),
-                    exportOptions: {
-                        columns: ':visible'
-
-                    }
-                },
-
-                {
-                    extend: 'print',
-                    text: '<i class="fa fa-print"></i>',
-                    titleAttr: 'Print',
-                    title: $('.download_label').html(),
-                        customize: function ( win ) {
-                    $(win.document.body)
-                        .css( 'font-size', '10pt' );
-
-                    $(win.document.body).find( 'table' )
-                        .addClass( 'compact' )
-                        .css( 'font-size','inherit');
-                },
-                    exportOptions: {
-                        columns: ':visible'
-                    }
-                },
-
-                {
-                    extend: 'colvis',
-                    text: '<i class="fa fa-columns"></i>',
-                    titleAttr: 'Columns',
-                    title: $('.download_label').html(),
-                    postfixButtons: ['colvisRestore']
-                },
-            ]
-        });
-
-        // Filter event handlers
-        $('#apply_filters').on('click', function() {
-            // Validate date range
-            var dateFrom = $('#date_from').val();
-            var dateTo = $('#date_to').val();
-            
-            if (dateFrom && dateTo && dateFrom > dateTo) {
-                alert('Date From cannot be greater than Date To');
-                return;
+   $(document).ready(function() {
+    // Initialize DataTable with filter support but defer loading
+    var test_ajax = $('.test_ajax').DataTable({
+        "processing": true,
+        "serverSide": true,
+        "createdRow": function(row, data, dataIndex) {
+            $(row).children(':nth-child(11)').addClass('text-right');
+            $(row).children(':nth-child(10)').addClass('text-right');
+            $(row).children(':nth-child(9)').addClass('text-right');
+            $(row).children(':nth-child(8)').addClass('text-right');
+        },
+        "ajax": {
+            "url": base_url+"hospital/patient/ipd_search",
+            "type": "POST",
+            "data": function(d) {
+                // Add filter parameters to AJAX request
+                d.date_from = $('#date_from').val();
+                d.date_to = $('#date_to').val();
+                d.medication_filter = $('#medication_filter').val();
             }
-            
-            // Show loading state
-            $(this).prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Loading...');
-            
-            // Reload DataTable with filters
-            test_ajax.ajax.reload(function() {
-                // Re-enable button
-                $('#apply_filters').prop('disabled', false).html('<i class="fa fa-filter"></i> Apply Filters');
-            });
-        });
+        },
+        "deferLoading": true, // Prevent initial AJAX call
+        responsive: 'true',
+        dom: "Bfrtip",
+        buttons: [
+            // ... your existing buttons configuration ...
+        ]
+    });
 
-        $('#clear_filters').on('click', function() {
-            // Clear all filter values
-            $('#date_from').val('');
-            $('#date_to').val('');
-            $('#medication_filter').val('');
-            
-            // Show loading state
-            $(this).prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Loading...');
-            
-            // Reload DataTable without filters
-            test_ajax.ajax.reload(function() {
-                // Re-enable button
-                $('#clear_filters').prop('disabled', false).html('<i class="fa fa-times"></i> Clear');
-            });
-        });
+    // Function to load data with current filters
+    function loadData() {
+        test_ajax.ajax.reload();
+    }
 
-        // Auto-apply filters when Enter key is pressed
-        $('#date_from, #date_to, #medication_filter').on('keypress', function(e) {
-            if (e.which === 13) { // Enter key
-                $('#apply_filters').click();
-            }
+    // Apply Filters button
+    $('#apply_filters').on('click', function() {
+        // Validate date range
+        var dateFrom = $('#date_from').val();
+        var dateTo = $('#date_to').val();
+        
+        if (dateFrom && dateTo && dateFrom > dateTo) {
+            alert('Date From cannot be greater than Date To');
+            return;
+        }
+        
+        // Show loading state
+        $(this).prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Loading...');
+        
+        // Load data with current filters
+        loadData();
+        
+        // Re-enable button after load completes
+        test_ajax.on('draw.dt', function() {
+            $('#apply_filters').prop('disabled', false).html('<i class="fa fa-filter"></i> Apply Filters');
         });
     });
 
+    // Clear Filters button - properly reset everything
+    $('#clear_filters').on('click', function() {
+        // Clear all filter values
+        $('#date_from').val('');
+        $('#date_to').val('');
+        $('#medication_filter').val('');
+        
+        // Show loading state
+        $(this).prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Loading...');
+        
+        // Clear the table data
+        test_ajax.clear().draw();
+        
+        // Reset to initial empty state
+        test_ajax.ajax.url(base_url+"hospital/patient/ipd_search").load(function() {
+            $('#clear_filters').prop('disabled', false).html('<i class="fa fa-times"></i> Clear');
+        }, false); // false prevents automatic parameter addition
+    });
+
+    // Auto-apply filters when Enter key is pressed
+    $('#date_from, #date_to, #medication_filter').on('keypress', function(e) {
+        if (e.which === 13) { // Enter key
+            $('#apply_filters').click();
+        }
+    });
+
+    // Optional: Load initial data when page loads (if needed)
+    // loadData();
+});
 $(".addpatient").click(function(){
 	$('#select2-addpatient_id-container').html("");
 	$('#formadd').trigger("reset");
