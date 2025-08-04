@@ -75,6 +75,7 @@ $genderList = $this->customlib->getGender();
             <th>Category</th>
             <th>Quantity</th>
             <th>Purchase Price</th>
+            <th>Total</th>
             <th>Dosage</th>
             <th>Instruction</th>
 
@@ -87,13 +88,14 @@ $genderList = $this->customlib->getGender();
         ?>
             <?php foreach ($details as $batch): ?>
                 <?php  
-                $totalAmount += $batch->sale_price; // Corrected total amount calculation
+                $totalAmount += $batch->sale_price * $batch->quantity; // Corrected total amount calculation
                 ?>
                 <tr>
                     <td><?php echo htmlspecialchars($batch->medicine_name); ?></td>
                     <td><?php echo htmlspecialchars($batch->medicine_category); ?></td>
                     <td><?php echo $batch->quantity; ?></td>
                     <td><?php echo $batch->sale_price; ?></td>
+                    <td><?php echo $batch->sale_price * $batch->quantity; ?></td>
                     <td><?php echo $batch->dosage_name; ?></td>
                     <td><?php echo $batch->instruction_name; ?></td>
                 </tr>
@@ -106,7 +108,7 @@ $genderList = $this->customlib->getGender();
     </tbody>
     <div style="display: block!important;">
         <tr>
-            <td colspan="3" class="text-right"><strong>Total:</strong></td>
+            <td colspan="4" class="text-right"><strong>Total:</strong></td>
             <td><strong><?php echo number_format($totalAmount, 2); ?></strong></td>
         </tr>
         </div>
