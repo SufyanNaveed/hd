@@ -369,7 +369,7 @@ $genderList = $this->customlib->getGender();
 
     // Perform AJAX request
     $.ajax({
-        url: '<?php echo base_url(); ?>hospital/pharmacy/get_medicine_name',
+        url: '<?php echo base_url(); ?>hospital/pharmacy/get_without_stock_medicine_name',
         type: "POST",
         data: { medicine_category_id: id },
         dataType: 'json',

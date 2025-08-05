@@ -127,7 +127,7 @@ $bloodgroup = $this->config->item('bloodgroup');
                                                                     </div>
                                                                 </div>
 
-                                                                <!-- <div class="col-lg-3 col-md-3 col-sm-3"
+                                                                <div class="col-lg-3 col-md-3 col-sm-3"
                                                                     style="<?php echo (!empty($user) && !empty($user->store_id)) ? '' : 'display: none;'; ?>"
                                                                     id="store_section">
                                                                     <div class="form-group">
@@ -144,7 +144,7 @@ $bloodgroup = $this->config->item('bloodgroup');
                                                                             <?php } ?>
                                                                         </select>
                                                                     </div>
-                                                                </div> -->
+                                                                </div>
  
                                                                 <div class="col-lg-3 col-md-3 col-sm-3">
                                                                     <div class="form-group">

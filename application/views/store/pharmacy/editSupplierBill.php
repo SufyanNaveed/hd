@@ -190,7 +190,7 @@ $genderList = $this->customlib->getGender();
     $("#medicine_edit_name" + rowid).html("<option value=''><?php echo $this->lang->line('loading') ?></option>");
     
     $.ajax({
-        url: '<?php echo base_url(); ?>hospital/pharmacy/get_medicine_name',
+        url: '<?php echo base_url(); ?>hospital/pharmacy/get_without_stock_medicine_name',
         type: "POST",
         data: {medicine_category_id: id},
         dataType: 'json',

@@ -300,9 +300,9 @@ class UserManagement extends Admin_Controller
         }
     
         if ($role_name === "Department Pharmacist") {
-            // $this->form_validation->set_rules('store_id', 'Store', 'trim|required', [
-            //     'required' => 'The %s field is required for Department Pharmacist role.'
-            // ]);
+            $this->form_validation->set_rules('store_id', 'Store', 'trim|required', [
+                'required' => 'The %s field is required for Department Pharmacist role.'
+            ]);
             if($departments == ""){ 
                 $this->form_validation->set_rules('department_id', 'Department', 'trim|required', [
                     'required' => 'The %s field is required for Department Pharmacist role.'
@@ -337,7 +337,7 @@ class UserManagement extends Admin_Controller
                 'hospital_id' => $this->input->post('hospital_id'),
                 'department_id' => $this->input->post('department_id')[0],
                 'password' => $this->enc_lib->passHashEnc($this->input->post('password')),
-                // 'store_id' => $this->input->post('store_id'),
+                'store_id' => $this->input->post('store_id'),
             );
     
             if ($this->user_model->update_user($update_id, $user_data)) {
